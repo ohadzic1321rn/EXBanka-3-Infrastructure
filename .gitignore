@@ -1,0 +1,17 @@
+# Environment
+.env
+
+# Build output
+bin/
+
+# Generated proto code (regenerate with: make proto)
+gen/proto/
+
+# Go
+*.sum
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp

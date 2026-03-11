@@ -1,0 +1,82 @@
+package config
+
+import (
+	"log"
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	// Database (PostgreSQL)
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBSSLMode  string
+
+	// Server ports
+	GRPCPort string
+	HTTPPort string
+
+	// JWT
+	JWTSecret          string
+	JWTAccessDuration  int // minutes
+	JWTRefreshDuration int // hours
+
+	// SMTP
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUser     string
+	SMTPPassword string
+	SMTPFrom     string
+
+	// Frontend base URL (used in email links)
+	FrontendURL string
+}
+
+func Load() *Config {
+	_ = godotenv.Load()
+
+	smtpPort, _ := strconv.Atoi(getEnv("SMTP_PORT", "1025"))
+	jwtAccessDur, _ := strconv.Atoi(getEnv("JWT_ACCESS_DURATION_MINUTES", "15"))
+	jwtRefreshDur, _ := strconv.Atoi(getEnv("JWT_REFRESH_DURATION_HOURS", "24"))
+
+	cfg := &Config{
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", "postgres"),
+		DBName:     getEnv("DB_NAME", "bankdb"),
+		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
+
+		GRPCPort: getEnv("GRPC_PORT", "9090"),
+		HTTPPort: getEnv("HTTP_PORT", "8080"),
+
+		JWTSecret:          getEnv("JWT_SECRET", "super-secret-jwt-key-change-in-production"),
+		JWTAccessDuration:  jwtAccessDur,
+		JWTRefreshDuration: jwtRefreshDur,
+
+		SMTPHost:     getEnv("SMTP_HOST", "localhost"),
+		SMTPPort:     smtpPort,
+		SMTPUser:     getEnv("SMTP_USER", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		SMTPFrom:     getEnv("SMTP_FROM", "noreply@bank.com"),
+
+		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:5173"),
+	}
+
+	log.Printf("Config loaded: DB=%s:%s/%s | HTTP=:%s | gRPC=:%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.HTTPPort, cfg.GRPCPort)
+
+	return cfg
+}
+
+func getEnv(key, defaultVal string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return defaultVal
+}

@@ -1,0 +1,202 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "proto/notification/v1/notification.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "NotificationService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/notification.v1.NotificationService/SendActivationEmail": {
+      "post": {
+        "operationId": "NotificationService_SendActivationEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SendEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SendActivationEmailRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NotificationService"
+        ]
+      }
+    },
+    "/notification.v1.NotificationService/SendConfirmationEmail": {
+      "post": {
+        "operationId": "NotificationService_SendConfirmationEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SendEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SendConfirmationEmailRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NotificationService"
+        ]
+      }
+    },
+    "/notification.v1.NotificationService/SendResetPasswordEmail": {
+      "post": {
+        "operationId": "NotificationService_SendResetPasswordEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SendEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SendResetPasswordEmailRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NotificationService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1SendActivationEmailRequest": {
+      "type": "object",
+      "properties": {
+        "toEmail": {
+          "type": "string"
+        },
+        "toName": {
+          "type": "string"
+        },
+        "activationToken": {
+          "type": "string"
+        },
+        "frontendUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SendConfirmationEmailRequest": {
+      "type": "object",
+      "properties": {
+        "toEmail": {
+          "type": "string"
+        },
+        "toName": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SendEmailResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SendResetPasswordEmailRequest": {
+      "type": "object",
+      "properties": {
+        "toEmail": {
+          "type": "string"
+        },
+        "toName": {
+          "type": "string"
+        },
+        "resetToken": {
+          "type": "string"
+        },
+        "frontendUrl": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

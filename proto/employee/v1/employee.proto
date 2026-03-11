@@ -1,0 +1,192 @@
+syntax = "proto3";
+
+package employee.v1;
+
+option go_package = "EXBanka/gen/proto/employee/v1;employeev1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+service EmployeeService {
+  // Create a new employee (generates activation token, sends email)
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/employees"
+      body: "*"
+    };
+  }
+
+  // Get full employee details including permissions
+  rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/employees/{id}"
+    };
+  }
+
+  // List employees with optional filters and pagination.
+  // Returns: ime, prezime, email, pozicija, broj_telefona, aktivan
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/employees"
+    };
+  }
+
+  // Update employee fields (excludes id and password).
+  // Returns error if target employee has admin permission.
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/employees/{id}"
+      body: "*"
+    };
+  }
+
+  // Toggle active/inactive status
+  rpc SetEmployeeActive(SetEmployeeActiveRequest) returns (SetEmployeeActiveResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/employees/{id}/active"
+      body: "*"
+    };
+  }
+
+  // Replace all permissions for an employee
+  rpc UpdateEmployeePermissions(UpdateEmployeePermissionsRequest) returns (UpdateEmployeePermissionsResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/employees/{id}/permissions"
+      body: "*"
+    };
+  }
+
+  // List all available system permissions
+  rpc GetAllPermissions(GetAllPermissionsRequest) returns (GetAllPermissionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/permissions"
+    };
+  }
+}
+
+// ─── Shared types ────────────────────────────────────────────────────────────
+
+message EmployeeProto {
+  uint64                    id             = 1;
+  string                    ime            = 2;
+  string                    prezime        = 3;
+  google.protobuf.Timestamp datum_rodjenja = 4;
+  string                    pol            = 5;
+  string                    email          = 6;
+  string                    broj_telefona  = 7;
+  string                    adresa         = 8;
+  string                    username       = 9;
+  string                    pozicija       = 10;
+  string                    departman      = 11;
+  bool                      aktivan        = 12;
+  repeated PermissionProto  permissions    = 13;
+}
+
+message PermissionProto {
+  uint64 id          = 1;
+  string name        = 2;
+  string description = 3;
+}
+
+// Compact view for the employee list table
+message EmployeeListItem {
+  uint64          id               = 1;
+  string          ime              = 2;
+  string          prezime          = 3;
+  string          email            = 4;
+  string          pozicija         = 5;
+  string          broj_telefona    = 6;
+  bool            aktivan          = 7;
+  repeated string permission_names = 8;
+}
+
+// ─── RPC messages ────────────────────────────────────────────────────────────
+
+message CreateEmployeeRequest {
+  string ime            = 1;
+  string prezime        = 2;
+  int64  datum_rodjenja = 3; // Unix timestamp
+  string pol            = 4;
+  string email          = 5;
+  string broj_telefona  = 6;
+  string adresa         = 7;
+  string username       = 8;
+  string pozicija       = 9;
+  string departman      = 10;
+  bool   aktivan        = 11; // default true
+}
+
+message CreateEmployeeResponse {
+  EmployeeProto employee = 1;
+  string        message  = 2;
+}
+
+message GetEmployeeRequest {
+  uint64 id = 1;
+}
+
+message GetEmployeeResponse {
+  EmployeeProto employee = 1;
+}
+
+message ListEmployeesRequest {
+  string email_filter    = 1;
+  string name_filter     = 2; // matches ime OR prezime
+  string pozicija_filter = 3;
+  int32  page            = 4;
+  int32  page_size       = 5;
+}
+
+message ListEmployeesResponse {
+  repeated EmployeeListItem employees  = 1;
+  int64                     total      = 2;
+  int32                     page       = 3;
+  int32                     page_size  = 4;
+}
+
+// UpdateEmployee excludes id and password — enforced at the service layer
+message UpdateEmployeeRequest {
+  uint64 id             = 1;
+  string ime            = 2;
+  string prezime        = 3;
+  int64  datum_rodjenja = 4;
+  string pol            = 5;
+  string email          = 6;
+  string broj_telefona  = 7;
+  string adresa         = 8;
+  string username       = 9;
+  string pozicija       = 10;
+  string departman      = 11;
+  bool   aktivan        = 12;
+}
+
+message UpdateEmployeeResponse {
+  EmployeeProto employee = 1;
+  string        message  = 2;
+}
+
+message SetEmployeeActiveRequest {
+  uint64 id      = 1;
+  bool   aktivan = 2;
+}
+
+message SetEmployeeActiveResponse {
+  bool   aktivan = 1;
+  string message = 2;
+}
+
+message UpdateEmployeePermissionsRequest {
+  uint64          id               = 1;
+  repeated string permission_names = 2;
+}
+
+message UpdateEmployeePermissionsResponse {
+  repeated PermissionProto permissions = 1;
+  string                   message     = 2;
+}
+
+message GetAllPermissionsRequest {}
+
+message GetAllPermissionsResponse {
+  repeated PermissionProto permissions = 1;
+}

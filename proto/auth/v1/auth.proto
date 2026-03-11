@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "EXBanka/gen/proto/auth/v1;authv1";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Bank App — Auth API"
+    version: "1.0"
+    description: "Authentication and account management endpoints"
+  }
+  security_definitions: {
+    security: {
+      key: "Bearer"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "Enter: Bearer <JWT>"
+      }
+    }
+  }
+};
+
+service AuthService {
+  // Login with email + password, returns JWT pair
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  // Exchange a refresh token for a new access token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // Activate a new employee account using the token from the email link.
+  // Requires two matching password fields (confirmation).
+  rpc ActivateAccount(ActivateAccountRequest) returns (ActivateAccountResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/activate"
+      body: "*"
+    };
+  }
+
+  // Request a password-reset email
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/password-reset/request"
+      body: "*"
+    };
+  }
+
+  // Complete password reset using the token from the email link
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/password-reset/confirm"
+      body: "*"
+    };
+  }
+}
+
+// ─── Request / Response messages ────────────────────────────────────────────
+
+message LoginRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string       access_token  = 1;
+  string       refresh_token = 2;
+  EmployeeInfo employee      = 3;
+}
+
+message EmployeeInfo {
+  uint64          id          = 1;
+  string          ime         = 2;
+  string          prezime     = 3;
+  string          email       = 4;
+  string          username    = 5;
+  string          pozicija    = 6;
+  repeated string permissions = 7;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token  = 1;
+  string refresh_token = 2;
+}
+
+message ActivateAccountRequest {
+  string token            = 1;
+  string password         = 2;
+  string password_confirm = 3;
+}
+
+message ActivateAccountResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+message RequestPasswordResetRequest {
+  string email = 1;
+}
+
+message RequestPasswordResetResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+message ResetPasswordRequest {
+  string token            = 1;
+  string password         = 2;
+  string password_confirm = 3;
+}
+
+message ResetPasswordResponse {
+  bool   success = 1;
+  string message = 2;
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "EXBanka/gen/proto/notification/v1;notificationv1";
+
+// NotificationService is internal only.
+// It is registered on the gRPC server but NOT exposed via the HTTP gateway.
+// Handlers call it directly via in-process gRPC or the service layer.
+service NotificationService {
+  rpc SendActivationEmail(SendActivationEmailRequest)     returns (SendEmailResponse);
+  rpc SendResetPasswordEmail(SendResetPasswordEmailRequest) returns (SendEmailResponse);
+  rpc SendConfirmationEmail(SendConfirmationEmailRequest)  returns (SendEmailResponse);
+}
+
+message SendActivationEmailRequest {
+  string to_email          = 1;
+  string to_name           = 2;
+  string activation_token  = 3;
+  string frontend_url      = 4;
+}
+
+message SendResetPasswordEmailRequest {
+  string to_email     = 1;
+  string to_name      = 2;
+  string reset_token  = 3;
+  string frontend_url = 4;
+}
+
+message SendConfirmationEmailRequest {
+  string to_email = 1;
+  string to_name  = 2;
+}
+
+message SendEmailResponse {
+  bool   success = 1;
+  string message = 2;
+}

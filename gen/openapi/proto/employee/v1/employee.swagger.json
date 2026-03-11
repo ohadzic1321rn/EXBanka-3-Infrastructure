@@ -1,0 +1,603 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "proto/employee/v1/employee.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "EmployeeService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/employees": {
+      "get": {
+        "summary": "List employees with optional filters and pagination.\nReturns: ime, prezime, email, pozicija, broj_telefona, aktivan",
+        "operationId": "EmployeeService_ListEmployees",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEmployeesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "emailFilter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nameFilter",
+            "description": "matches ime OR prezime",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pozicijaFilter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      },
+      "post": {
+        "summary": "Create a new employee (generates activation token, sends email)",
+        "operationId": "EmployeeService_CreateEmployee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateEmployeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateEmployeeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      }
+    },
+    "/api/v1/employees/{id}": {
+      "get": {
+        "summary": "Get full employee details including permissions",
+        "operationId": "EmployeeService_GetEmployee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetEmployeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      },
+      "put": {
+        "summary": "Update employee fields (excludes id and password).\nReturns error if target employee has admin permission.",
+        "operationId": "EmployeeService_UpdateEmployee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateEmployeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmployeeServiceUpdateEmployeeBody"
+            }
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      }
+    },
+    "/api/v1/employees/{id}/active": {
+      "patch": {
+        "summary": "Toggle active/inactive status",
+        "operationId": "EmployeeService_SetEmployeeActive",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SetEmployeeActiveResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmployeeServiceSetEmployeeActiveBody"
+            }
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      }
+    },
+    "/api/v1/employees/{id}/permissions": {
+      "put": {
+        "summary": "Replace all permissions for an employee",
+        "operationId": "EmployeeService_UpdateEmployeePermissions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateEmployeePermissionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmployeeServiceUpdateEmployeePermissionsBody"
+            }
+          }
+        ],
+        "tags": [
+          "EmployeeService"
+        ]
+      }
+    },
+    "/api/v1/permissions": {
+      "get": {
+        "summary": "List all available system permissions",
+        "operationId": "EmployeeService_GetAllPermissions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetAllPermissionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "EmployeeService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "EmployeeServiceSetEmployeeActiveBody": {
+      "type": "object",
+      "properties": {
+        "aktivan": {
+          "type": "boolean"
+        }
+      }
+    },
+    "EmployeeServiceUpdateEmployeeBody": {
+      "type": "object",
+      "properties": {
+        "ime": {
+          "type": "string"
+        },
+        "prezime": {
+          "type": "string"
+        },
+        "datumRodjenja": {
+          "type": "string",
+          "format": "int64"
+        },
+        "pol": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "brojTelefona": {
+          "type": "string"
+        },
+        "adresa": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "pozicija": {
+          "type": "string"
+        },
+        "departman": {
+          "type": "string"
+        },
+        "aktivan": {
+          "type": "boolean"
+        }
+      },
+      "title": "UpdateEmployee excludes id and password — enforced at the service layer"
+    },
+    "EmployeeServiceUpdateEmployeePermissionsBody": {
+      "type": "object",
+      "properties": {
+        "permissionNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CreateEmployeeRequest": {
+      "type": "object",
+      "properties": {
+        "ime": {
+          "type": "string"
+        },
+        "prezime": {
+          "type": "string"
+        },
+        "datumRodjenja": {
+          "type": "string",
+          "format": "int64",
+          "title": "Unix timestamp"
+        },
+        "pol": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "brojTelefona": {
+          "type": "string"
+        },
+        "adresa": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "pozicija": {
+          "type": "string"
+        },
+        "departman": {
+          "type": "string"
+        },
+        "aktivan": {
+          "type": "boolean",
+          "title": "default true"
+        }
+      }
+    },
+    "v1CreateEmployeeResponse": {
+      "type": "object",
+      "properties": {
+        "employee": {
+          "$ref": "#/definitions/v1EmployeeProto"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1EmployeeListItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "ime": {
+          "type": "string"
+        },
+        "prezime": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "pozicija": {
+          "type": "string"
+        },
+        "brojTelefona": {
+          "type": "string"
+        },
+        "aktivan": {
+          "type": "boolean"
+        },
+        "permissionNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Compact view for the employee list table"
+    },
+    "v1EmployeeProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "ime": {
+          "type": "string"
+        },
+        "prezime": {
+          "type": "string"
+        },
+        "datumRodjenja": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pol": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "brojTelefona": {
+          "type": "string"
+        },
+        "adresa": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "pozicija": {
+          "type": "string"
+        },
+        "departman": {
+          "type": "string"
+        },
+        "aktivan": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PermissionProto"
+          }
+        }
+      }
+    },
+    "v1GetAllPermissionsResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PermissionProto"
+          }
+        }
+      }
+    },
+    "v1GetEmployeeResponse": {
+      "type": "object",
+      "properties": {
+        "employee": {
+          "$ref": "#/definitions/v1EmployeeProto"
+        }
+      }
+    },
+    "v1ListEmployeesResponse": {
+      "type": "object",
+      "properties": {
+        "employees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1EmployeeListItem"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1PermissionProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SetEmployeeActiveResponse": {
+      "type": "object",
+      "properties": {
+        "aktivan": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UpdateEmployeePermissionsResponse": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PermissionProto"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UpdateEmployeeResponse": {
+      "type": "object",
+      "properties": {
+        "employee": {
+          "$ref": "#/definitions/v1EmployeeProto"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
