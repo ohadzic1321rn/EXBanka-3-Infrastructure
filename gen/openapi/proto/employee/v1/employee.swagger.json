@@ -18,7 +18,7 @@
   "paths": {
     "/api/v1/employees": {
       "get": {
-        "summary": "List employees with optional filters and pagination.\nReturns: ime, prezime, email, pozicija, broj_telefona, aktivan",
+        "summary": "List employees with optional filters and pagination.\r\nReturns: ime, prezime, email, pozicija, broj_telefona, aktivan",
         "operationId": "EmployeeService_ListEmployees",
         "responses": {
           "200": {
@@ -137,7 +137,7 @@
         ]
       },
       "put": {
-        "summary": "Update employee fields (excludes id and password).\nReturns error if target employee has admin permission.",
+        "summary": "Update employee fields (excludes id and password).\r\nReturns error if target employee has admin permission.",
         "operationId": "EmployeeService_UpdateEmployee",
         "responses": {
           "200": {
