@@ -1,0 +1,189 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bankdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+  backend:
+    build:
+      context: .
+      dockerfile: EXBanka-3-Backend/Dockerfile
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      GRPC_PORT: 9090
+      HTTP_PORT: 8080
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_ACCESS_DURATION_MINUTES: 15
+      JWT_REFRESH_DURATION_HOURS: 24
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_FROM: noreply@bank.com
+      FRONTEND_URL: http://localhost
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: EXBanka-3-Backend/auth-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      GRPC_PORT: 9091
+      HTTP_PORT: 8081
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_ACCESS_DURATION_MINUTES: 15
+      JWT_REFRESH_DURATION_HOURS: 24
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_FROM: noreply@bank.com
+      FRONTEND_URL: http://localhost
+
+  employee-service:
+    build:
+      context: .
+      dockerfile: EXBanka-3-Backend/employee-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      mailhog:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      GRPC_PORT: 9092
+      HTTP_PORT: 8082
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_ACCESS_DURATION_MINUTES: 15
+      JWT_REFRESH_DURATION_HOURS: 24
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_FROM: noreply@bank.com
+      FRONTEND_URL: http://localhost
+
+  client-service:
+    build:
+      context: .
+      dockerfile: EXBanka-3-Backend/client-service/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      GRPC_PORT: 9093
+      HTTP_PORT: 8083
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_ACCESS_DURATION_MINUTES: 15
+      JWT_REFRESH_DURATION_HOURS: 24
+
+  account-service:
+    build:
+      context: .
+      dockerfile: EXBanka-3-Backend/account-service/Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      GRPC_PORT: 9094
+      HTTP_PORT: 8084
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      JWT_ACCESS_DURATION_MINUTES: 15
+      JWT_REFRESH_DURATION_HOURS: 24
+
+  loan-service:
+    build:
+      context: ./EXBanka-3-Backend/loan-service
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: bankdb
+      DB_SSL_MODE: disable
+      HTTP_PORT: 8089
+      JWT_SECRET: super-secret-jwt-key-change-in-production
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_FROM: noreply@bank.com
+
+  frontend:
+    build:
+      context: ./EXBanka-3-Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - auth-service
+      - employee-service
+      - client-service
+      - account-service
+
+volumes:
+  pgdata:
